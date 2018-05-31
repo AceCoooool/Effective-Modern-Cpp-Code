@@ -1,18 +1,17 @@
 # Effective-Modern-Cpp-Code
-Demo code for《Effective Modern C++》（in the process）
+《Effective Modern C++》书上的实例代码（更新ing）
 
 ## Loadmap
 
 ### ch1：类型推导
 
-- [x] item1
-- [x] item2
-- [x] item3
-- [x] item4
+- [x] item1~item4
+- [x] summary
 
 ### ch2：auto
 
-- [x] item5
+- [x] item5~item6
+- [x] summary
 
   ​
 
