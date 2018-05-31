@@ -66,11 +66,15 @@ void demo4() {
 
 int main() {
 /*-----case 1&3----*/
-//    demo1();
+    cout << "------demo1------" << endl;
+    demo1();
 /* -----case 2----- */
-//    demo2();
+    cout << "------demo2------" << endl;
+    demo2();
 /* -----array & functions----- */
-//    demo3();
+    cout << "------demo3------" << endl;
+    demo3();
 /* -----initializer_list----- */
-//    demo4();
+    cout << "------demo4------" << endl;
+    demo4();
 }

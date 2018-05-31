@@ -120,18 +120,28 @@ void demo10() {
 
 int main() {
 /*-----case 1----*/
-//    demo1();
-//    demo2();
-//    demo3();
+    cout << "------demo1------" << endl;
+    demo1();
+    cout << "------demo2------" << endl;
+    demo2();
+    cout << "------demo3------" << endl;
+    demo3();
 /*-----case 2----*/
-//    demo4();
+    cout << "------demo4------" << endl;
+    demo4();
 /*-----case 3----*/
-//    demo5();
-//    demo6();
+    cout << "------demo5------" << endl;
+    demo5();
+    cout << "------demo6------" << endl;
+    demo6();
 /*-----array----*/
-//    demo7();
-//    demo8();
-//    demo9();
+    cout << "------demo7------" << endl;
+    demo7();
+    cout << "------demo8------" << endl;
+    demo8();
+    cout << "------demo9------" << endl;
+    demo9();
 /*-----functions----*/
+    cout << "------demo10------" << endl;
     demo10();
 }

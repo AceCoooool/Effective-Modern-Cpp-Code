@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <boost/type_index.hpp>
 
 using namespace std;
@@ -83,8 +84,11 @@ void demo3(){
 
 int main() {
 /* -----case1: typical cases----- */
-//    demo1();
-//    demo2();
+    cout << "------demo1------" << endl;
+    demo1();
+    cout << "------demo2------" << endl;
+    demo2();
 /* -----case3: x or (x)----- */
+    cout << "------demo3------" << endl;
     demo3();
 }

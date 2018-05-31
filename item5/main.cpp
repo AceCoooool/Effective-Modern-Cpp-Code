@@ -1,4 +1,6 @@
 #include <iostream>
+#include <vector>
+#include <memory>
 #include <boost/type_index.hpp>
 
 using namespace std;
@@ -8,7 +10,7 @@ using boost::typeindex::type_id_with_cvr;
 template<typename It>
 void dwim(It b, It e) {
     while (b != e) {
-        typename iterator_traits<It>::value_type currValue = *b;
+        typename iterator_traits<It>::value_type currValue = *b;  // 写起来太繁琐
         cout << currValue << " ";
         ++b;
     }
@@ -32,20 +34,36 @@ void demo1() {
 }
 
 /* -----lambda demo----- */
-auto dereUPLess = [](const std::unique_ptr<int> &p1, const std::unique_ptr<int> &p2) {
+class Widget {
+public:
+    Widget() {};
+
+    Widget(int i) : val(i) {}
+
+    bool operator<(const Widget &w1) {
+        return this->val < w1.val;
+    }
+
+private:
+    int val;
+};
+
+// c++11
+auto dereUPLess = [](const std::unique_ptr<Widget> &p1, const std::unique_ptr<Widget> &p2) {
     return *p1 < *p2;
 };
 
+// c++14
 auto dereUPLess2 = [](const auto &p1, const auto &p2) {
     return *p1 < *p2;
 };
 
-std::function<bool(const std::unique_ptr<int> &, const std::unique_ptr<int> &)>
-        dereUPLess3 = [](const std::unique_ptr<int> &p1, const std::unique_ptr<int> &p2) { return *p1 < *p2; };
+std::function<bool(const std::unique_ptr<Widget> &, const std::unique_ptr<Widget> &)>
+        dereUPLess3 = [](const std::unique_ptr<Widget> &p1, const std::unique_ptr<Widget> &p2) { return *p1 < *p2; };
 
 void demo2() {
-    auto a = 10, b = 20;
-    unique_ptr<decltype(a)> pa(&a), pb(&b);
+    auto pa = make_unique<Widget>(2), pb = make_unique<Widget>(3);
+//    unique_ptr<Widget> pa{new Widget(4)}, pb(new Widget(5));   // another form
     auto res1 = dereUPLess(pa, pb);
     auto res2 = dereUPLess2(pa, pb);
     auto res3 = dereUPLess3(pa, pb);
@@ -56,7 +74,9 @@ void demo2() {
 
 int main() {
 /* -----iterator demo----- */
-//    demo1();
+    cout << "------demo1------" << endl;
+    demo1();
 /* -----lambda demo----- */
+    cout << "------demo2------" << endl;
     demo2();
 }
