@@ -54,3 +54,74 @@
 
 > 反正请都使用=delete吧，忘了private的方式～
 
+## 条款12. 为需要"改写"的函数添加override声明
+
+- 为需要改写的函数添加override声明
+
+- 成员函数引用修饰词使得对于左值和右值对象(*this)的处理能够区分开来
+
+  ```cpp
+  class Widget{
+  public:
+      void dowork() &;   // 左值对象
+      void dowork() &&;  // 右值对象
+  }
+  ```
+
+> 改写(override)需要满足的条件：
+>
+> - 基类中的函数必须是虚函数
+> - 基类和派生类中的函数名字必须完全相同（析构函数除外）
+> - 基类和派生类中的函数形参类型必须完全相同
+> - 基类和派生类中的函数常量性必须完全相同
+> - 基类和派生类中的函数返回值和异常规格必须兼容
+> - 基类和派生类中的函数**引用修饰词**必须完全相同（C++11）--- 带有引用修饰词的成员函数，不必是虚函数
+>
+> 将final应用于虚函数，会阻止它在派生类中被改写。final也可以被应用于一个类，在这种情况下，该类会被禁止作为基类
+
+## 条款13. 优先选用const_iterator，而非iterator
+
+- 优先选用const_iterator，而非iterator
+- 在最通用的代码中，优先选用非成员函数版本的begin，end和rbegin等，而非成员函数版本（主要是因为一些类似容器的数据结构会以非成员函数的方式提供begin和end等---如string）
+
+> 注意：const_iterator指的是"指针"所指的对象具有常量性，而不是指针本身具有常量性
+
+## 条款14. 未完待续
+
+
+
+## 条款15. 只要有可能使用constexpr，就使用它
+
+- constexpr对象都具备const属性，并由编译期已知的值完成初始化
+
+- constexpr函数在调用时若传入的实参值是编译期已知的，则会产出编译期结果
+
+  > 1. constexpr函数可以用在要求编译期常量的语境中。在这样的语境中，若你传给一个constexpr函数的实参值是在编译期已知的，则结果也会在编译期间计算出来。
+  > 2. 在调用constexpr函数时，若传入的值有一个或多个在编译期未知，则它的运作方式和普通函数无异，即它也是在运行期执行结果的计算
+  > 3. constexpr函数的形式有限制：一般只包含一条return语句（C++14中适当放宽了）
+
+- 比起非constexpr对象或constexpr函数而言，constexpr对象或是constexpr函数可以用在一个作用域更广的语境中
+
+其他关于constexpr的优势：
+
+1. constexpr用于对象时，其实就是加强版的const（constexpr对象都是const对象，而并非所有的const对象都是constexpr对象）
+2. 编译期确定往往效率更高，应用语境更广（类似作为数组长度等等）
+
+## 条款16. 保证const成员函数的线程安全性
+
+- 保证const成员函数的线程安全性，除非可以确信它们不会用在并发语境中
+- 运用`std::atomic`类型的变量会比运用互斥量提供更好的性能，但前者仅适用对单个变量或内存区域的操作
+
+> 其他内容：
+>
+> 1. `mutable`修饰词：使得const成员函数能够修改`mutable`修饰的数据成员（详见[mutable](https://www.zhihu.com/question/64969053/answer/226383958)）
+>
+> 2. `mutex`：在头文件`<mutex>`中，主要起"增加+解除"互斥量。一般简答的用法（详细的介绍见：[mutex](https://stackoverflow.com/questions/4989451/mutex-example-tutorial)，[mutex](https://blog.poxiao.me/p/multi-threading-in-cpp11-part-2-mutex-and-lock/)）
+>
+>    ```cpp
+>    mutex m;
+>    lock_guard<mutex> g(m)
+>    ```
+>
+> 3. `atomic`：在头文件`<atomic>`中，主要起原子操作。（详见：[atomic](https://stackoverflow.com/questions/31978324/what-exactly-is-stdatomic)）
+

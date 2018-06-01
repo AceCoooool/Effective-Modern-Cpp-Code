@@ -16,7 +16,7 @@
 
 ### ch3：转向现代C++
 
-- [x] item7~item11
+- [x] item7~item16（item14 unfinished）
 - [x] summary
 
 未完待续......
