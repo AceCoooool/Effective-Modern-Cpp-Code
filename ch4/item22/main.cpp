@@ -17,7 +17,7 @@ void demo1() {
 
 
 int main() {
-/* -----demo1: weak_ptr expired----- */
+/* -----demo1: pimpl demo----- */
     cout << "--------demo1--------" << endl;
     demo1();
 }
