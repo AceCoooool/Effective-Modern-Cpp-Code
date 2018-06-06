@@ -21,5 +21,5 @@
 
 ### ch4：智能指针
 
-- [x] item18~item20
+- [x] item18~item22
 - [x] summary
