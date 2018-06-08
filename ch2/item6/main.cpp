@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <valarray>
 #include <boost/type_index.hpp>
 
@@ -14,6 +15,9 @@ void demo1() {
          << " , value: " << priority1 << endl;
     cout << "priorty2's type: " << type_id_with_cvr<decltype(priority2)>().pretty_name()
          << " , value: " << priority2 << endl;
+    auto priority3 = static_cast<bool>(features[2]);
+    cout << "priorty3's type: " << type_id_with_cvr<decltype(priority3)>().pretty_name()
+         << " , value: " << priority3 << endl;
 }
 
 /* -----matrix demo----- */
@@ -33,7 +37,9 @@ void demo2() {
 
 int main() {
 /* -----vector<bool>::reference----- */
-//    demo1();
+    cout << "--------demo1--------" << endl;
+    demo1();
 /* -----matrix demo----- */
+    cout << "--------demo2--------" << endl;
     demo2();
 }
