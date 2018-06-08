@@ -45,6 +45,7 @@ auto authAndAccess11(Container &c, Index i) -> decltype(c[i]) {
 // c++11: final C++11 version
 template<typename Container, typename Index>
 auto authAndAccess11_v2(Container &&c, Index i) -> decltype(std::forward<Container>(c)[i]) {
+    cout << "decltype(c[i]): " << type_id_with_cvr<decltype(std::forward<Container>(c)[i])>().pretty_name() << endl;
     return std::forward<Container>(c)[i];
 }
 
@@ -64,7 +65,7 @@ decltype(auto) authAndAccess14_v2(Container &c, Index i) {
 
 // c++14: perfect
 template<typename Container, typename Index>
-decltype(auto) authAndAccess14_v2(Container &&c, Index i) {
+decltype(auto) authAndAccess14_v3(Container &&c, Index i) {
     return std::forward<Container>(c)[i];
 }
 
@@ -73,13 +74,16 @@ void demo2() {
     vector<int> vec = {3, 4, 45, 6, 7};
     auto res = authAndAccess11(vec, 2);
     auto s = authAndAccess11_v2(makeString(), 2);
+    auto t1 = authAndAccess14(vec, 2);
+    auto t2 = authAndAccess14_v2(vec, 2);
+    auto t3 = authAndAccess14_v3(makeString(), 2);
 }
 
 /* -----case3: x or (x)----- */
-void demo3(){
-    auto x= 10;
-    cout<<"x: "<<type_id_with_cvr<decltype(x)>()<<endl;
-    cout<<"x: "<<type_id_with_cvr<decltype((x))>()<<endl;
+void demo3() {
+    auto x = 10;
+    cout << "x: " << type_id_with_cvr<decltype(x)>() << endl;
+    cout << "x: " << type_id_with_cvr<decltype((x))>() << endl;
 }
 
 int main() {
