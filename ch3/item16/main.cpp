@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <future>
 #include <atomic>
 #include <mutex>
 #include <thread>
@@ -16,6 +17,7 @@ class Polynominal {
 public:
     void roots() const {
         if (!rootsAreValid) {
+            this_thread::sleep_for(chrono::microseconds(1));
             cout << "root are invalid" << endl;
             rootsAreValid = true;
         } else {
@@ -31,12 +33,11 @@ private:
 void demo1() {
     Polynominal *p = new Polynominal();
     constexpr auto num_threads = 10;
-    thread t[num_threads];
-    for (auto i = 0; i < num_threads; ++i) {
-        t[i] = thread(&Polynominal::roots, p);
-    }
+    vector<future<void>> f;
     for (auto i = 0; i < num_threads; ++i)
-        t[i].join();
+        f.push_back(async(launch::async, &Polynominal::roots, p));
+    for (auto i = 0; i < num_threads; ++i)
+        f[i].wait();
 }
 
 // thread safe --- use mutex
@@ -45,6 +46,7 @@ public:
     void roots() const {
         lock_guard<mutex> g(m);
         if (!rootsAreValid) {
+            this_thread::sleep_for(chrono::microseconds(1));
             cout << "root are invalid" << endl;
             rootsAreValid = true;
         } else {
@@ -60,12 +62,11 @@ private:
 void demo2() {
     Polynominal1 *p = new Polynominal1();
     constexpr auto num_threads = 10;
-    thread t[num_threads];
-    for (auto i = 0; i < num_threads; ++i) {
-        t[i] = thread(&Polynominal1::roots, p);
-    }
+    vector<future<void>> f;
     for (auto i = 0; i < num_threads; ++i)
-        t[i].join();
+        f.push_back(async(launch::async, &Polynominal1::roots, p));
+    for (auto i = 0; i < num_threads; ++i)
+        f[i].wait();
 }
 
 // unsafe
@@ -74,9 +75,15 @@ public:
     Point(double a, double b) : x(a), y(b) {}
 
     double distanceFromOrigin() const noexcept {
-        ++callCount;
-        cout << callCount << endl;
+        for (int i = 0; i < 10000; ++i) {
+            callCount = callCount + 5;
+            callCount = callCount - 5;
+        }
         return sqrt(x * x + y * y);
+    }
+
+    unsigned Count() {
+        cout << "final(not atomic):" << callCount << endl;
     }
 
 private:
@@ -84,15 +91,33 @@ private:
     double x, y;
 };
 
+void demo3() {
+    Point *p = new Point(2.0, 2.0);
+    constexpr auto num_threads = 10;
+    vector<future<double>> f;
+    for (auto i = 0; i < num_threads; ++i)
+        f.push_back(async(launch::async, &Point::distanceFromOrigin, p));
+    for (auto i = 0; i < num_threads; ++i)
+        f[i].wait();
+    p->Count();
+}
+
+
 // atomic: for one parameter situation
 class Point1 {
 public:
     Point1(double a, double b) : x(a), y(b) {}
 
     double distanceFromOrigin() const noexcept {
-        ++callCount;
-        cout << callCount << endl;
+        for (int i = 0; i < 10000; ++i) {
+            callCount += 5;
+            callCount -= 5;
+        }
         return sqrt(x * x + y * y);
+    }
+
+    unsigned Count() {
+        cout << "final(atomic):" << callCount << endl;
     }
 
 private:
@@ -100,23 +125,15 @@ private:
     double x, y;
 };
 
-// TODO: there may some error
-void demo3() {
-    Point *p = new Point(2.0, 2.0);
-    Point1 *p1 = new Point1(2.0, 2.0);
+void demo4() {
+    Point1 *p = new Point1(2.0, 2.0);
     constexpr auto num_threads = 10;
-    thread t[num_threads];
-    for (auto i = 0; i < num_threads; ++i) {
-        t[i] = thread(&Point::distanceFromOrigin, p);
-    }
+    vector<future<double>> f;
     for (auto i = 0; i < num_threads; ++i)
-        t[i].join();
-    cout << "-----atomic-----" << endl;
-    for (auto i = 0; i < num_threads; ++i) {
-        t[i] = thread(&Point1::distanceFromOrigin, p1);
-    }
+        f.push_back(async(launch::async, &Point1::distanceFromOrigin, p));
     for (auto i = 0; i < num_threads; ++i)
-        t[i].join();
+        f[i].wait();
+    p->Count();
 }
 
 // unsafe
@@ -125,6 +142,7 @@ public:
     int magicValue() const {
         if (cacheValid) cout << "cache valid" << endl;
         else {
+            this_thread::sleep_for(chrono::microseconds(1));
             cachedValue = 10;
             cout << "cache invalid" << endl;
             cacheValid = true;
@@ -136,15 +154,14 @@ private:
     mutable atomic<int> cachedValue;
 };
 
-void demo4() {
+void demo5() {
     Widget1 *w = new Widget1();
     constexpr auto num_threads = 10;
-    thread t[num_threads];
-    for (auto i = 0; i < num_threads; ++i) {
-        t[i] = thread(&Widget1::magicValue, w);
-    }
+    vector<future<int>> f;
     for (auto i = 0; i < num_threads; ++i)
-        t[i].join();
+        f.push_back(async(launch::async, &Widget1::magicValue, w));
+    for (auto i = 0; i < num_threads; ++i)
+        f[i].wait();
 }
 
 // safe
@@ -154,6 +171,7 @@ public:
         lock_guard<mutex> g(m);
         if (cacheValid) cout << "cache valid" << endl;
         else {
+            this_thread::sleep_for(chrono::microseconds(1));
             cachedValue = 10;
             cout << "cache invalid" << endl;
             cacheValid = true;
@@ -166,15 +184,14 @@ private:
     mutable int cachedValue;
 };
 
-void demo5() {
+void demo6() {
     Widget2 *w = new Widget2();
     constexpr auto num_threads = 10;
-    thread t[num_threads];
-    for (auto i = 0; i < num_threads; ++i) {
-        t[i] = thread(&Widget2::magicValue, w);
-    }
+    vector<future<int>> f;
     for (auto i = 0; i < num_threads; ++i)
-        t[i].join();
+        f.push_back(async(launch::async, &Widget2::magicValue, w));
+    for (auto i = 0; i < num_threads; ++i)
+        f[i].wait();
 }
 
 int main() {
@@ -187,10 +204,12 @@ int main() {
 /* -----demo3: atomic----- */
     cout << "--------demo3--------" << endl;
     demo3();
-/* -----demo4: problem of atomic----- */
     cout << "--------demo4--------" << endl;
     demo4();
+/* -----demo4: problem of atomic----- */
     cout << "--------demo5--------" << endl;
     demo5();
+    cout << "--------demo6--------" << endl;
+    demo6();
 
 }

@@ -37,12 +37,12 @@ constexpr int pow2(int base, int exp) noexcept {
 void demo2() {
     constexpr auto numConds = 5;
     array<int, pow1(3, numConds)> results;
-    cout << results.size() << endl;
+    cout << "C++11: " << results.size() << endl;
     array<int, pow2(3, numConds)> results2;
-    cout << results2.size() << endl;
+    cout << "C++14: " << results2.size() << endl;
     int i = 5;
     auto num = pow1(3, i);
-    cout << num << endl;
+    cout << "normal func: " << num << endl;
 }
 
 /* -----demo3: constexpr class function----- */
@@ -80,7 +80,7 @@ void demo3() {
     constexpr Point p1(9.4, 27.7);
     constexpr Point p2(28.8, 5.3);
     constexpr auto mid = midpoint(p1, p2);
-    cout << mid.xValue() << ", " << mid.yValue() << endl;
+    cout << "constexpr class: " << mid.xValue() << ", " << mid.yValue() << endl;
     constexpr auto reflectMid = reflection(mid);
     cout << reflectMid.xValue() << ", " << reflectMid.yValue() << endl;
 }

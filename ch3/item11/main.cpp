@@ -9,6 +9,7 @@ using boost::typeindex::type_id_with_cvr;
 
 /* -----demo1: delete in function----- */
 bool isLucky(int number) {
+    cout << "call bool (int)" << endl;
     return (number == 3);
 }
 
@@ -29,6 +30,7 @@ void demo1() {
 /* -----demo2: delete in template----- */
 template<typename T>
 void processPointer(T *ptr) {
+    cout << "call void (T *ptr)" << endl;
     cout << *ptr << endl;
 }
 

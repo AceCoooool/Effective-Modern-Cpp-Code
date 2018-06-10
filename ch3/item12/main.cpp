@@ -59,12 +59,12 @@ public:
 
     Widget(DataType v) : values(v) {}
 
-    DataType &data() &{
+    DataType &data() &{    // 返回左值Widget类型
         cout << "data()&" << endl;
         return values;
     }
 
-    DataType data() &&{
+    DataType data() &&{    // 返回右值Widget类型
         cout << "data() &&" << endl;
         return move(values);
     }

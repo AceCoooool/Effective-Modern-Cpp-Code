@@ -20,7 +20,8 @@ void demo1() {
 //    for (auto a: values)
 //        cout << a << " ";
 //    cout << endl;
-    auto it = std::find(values.begin(), values.end(), v);
+    auto it = std::find(values.cbegin(), values.cend(), v);
+    cout << type_id_with_cvr<decltype(it)>().pretty_name() << endl;
     values.insert(it, 1998);
     for (auto a: values)
         cout << a << " ";
@@ -53,7 +54,7 @@ auto cbegin11(const C &container) -> decltype(begin(container)) {
 }
 
 template<typename C>
-auto cend11(const C &container) -> decltype(end(container)){
+auto cend11(const C &container) -> decltype(end(container)) {
     return end(container);
 }
 

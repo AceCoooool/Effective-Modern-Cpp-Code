@@ -40,8 +40,16 @@ void f3(Widget *pw) {
     cout << "f3(int *)" << endl;
 }
 
+// C++11
 template<typename FuncType, typename MuxType, typename PtrType>
 auto lockAndCall(FuncType func, MuxType &mutex, PtrType ptr) -> decltype(func(ptr)) {
+    MuxGuard g(mutex);
+    return func(ptr);
+};
+
+// C++14
+template<typename FuncType, typename MuxType, typename PtrType>
+decltype(auto) lockAndCall14(FuncType func, MuxType &mutex, PtrType ptr) {
     MuxGuard g(mutex);
     return func(ptr);
 };
@@ -54,6 +62,9 @@ void demo2() {
     lockAndCall(f1, f1m, nullptr);
     lockAndCall(f2, f2m, nullptr);
     lockAndCall(f3, f3m, nullptr);
+    lockAndCall14(f1, f1m, nullptr);
+    lockAndCall14(f2, f2m, nullptr);
+    lockAndCall14(f3, f3m, nullptr);
 }
 
 int main() {
