@@ -32,6 +32,31 @@ void demo1() {
     cout << type_id_with_cvr<decltype(move14(v))>().pretty_name() << endl;
 }
 
+class Temp {
+public:
+    Temp(string s) : temp(s) {};
+
+    Temp(const Temp &rhs) : temp(rhs.temp) { cout << "call Temp(const Temp &rhs)" << endl; };
+
+    Temp(Temp &&rhs) : temp(move(rhs.temp)) { cout << "call Temp(Temp &&rhs)" << endl; };
+
+private:
+    string temp;
+};
+
+class Annotation {
+public:
+    explicit Annotation(const Temp t) : tmp(move(t)) {};
+
+private:
+    Temp tmp;
+};
+
+void demo2() {
+    Temp s("hello");
+    Annotation a1(s);
+}
+
 /* -----demo2: forward----- */
 class Widget {
 public:
@@ -55,12 +80,11 @@ template<typename T>
 void logAndProcess(T &&param) {
     auto now = chrono::system_clock::now();
     makeLogEntry("Calling process: ", now);
-//    cout << type_id_with_cvr<decltype(param)>().pretty_name() << endl;
     process(param);
     process(forward<T>(param));
 }
 
-void demo2() {
+void demo3() {
     Widget w;
     logAndProcess(w);
     logAndProcess(move(w));
@@ -105,7 +129,7 @@ private:
 
 size_t Widget3::moveCtorCalls = 0; //静态成员变量的定义性说明
 
-void demo3() {
+void demo4() {
     cout << "move version" << endl;
     Widget2 w1;
     Widget2::Print();
@@ -122,11 +146,13 @@ int main() {
 /* -----demo1: move own----- */
     cout << "--------demo1--------" << endl;
     demo1();
-/* -----demo2: forward----- */
     cout << "--------demo2--------" << endl;
     demo2();
-/* -----demo3: forward vs move----- */
+/* -----demo2: forward----- */
     cout << "--------demo3--------" << endl;
     demo3();
+/* -----demo4: forward vs move----- */
+    cout << "--------demo4--------" << endl;
+    demo4();
 }
 
