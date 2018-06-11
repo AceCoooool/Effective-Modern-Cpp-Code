@@ -9,38 +9,76 @@
 5. 即使启用够确信，指针拥有其指涉的对象，并且也知道应该如何析构，要保证析构在所有代码路径上都仅只执行一次（包括那些导致异常的路径）仍然困难重重。只要少在一条路径上执行，就会导致内存泄露。而如果析构在一条路径上执行了多于一次，则会导致未定义行为
 6. 没有什么正规的方式能检测出指针是否空悬，也就是说，它指涉的内存是否已经不在持有指针本应该指涉的对象。如果一个对象已经被析构了，而某些指针仍然会指涉到它，就会产生空悬指针
 
-## 条款18：使用std::unique_ptr管理具备专属所有权的资源
+## 条款18. 使用std::unique_ptr管理具备专属所有权的资源
 
 - std::unique_ptr是小巧，高速的，具备只移类型（不能复制，只能move操作）的智能指针，对托管资源实施专属所有权语义。
-- 默认地，资源析构采用delete运算符来实现，但可以指定自定义删除器。有状态的删除其和采用函数指针实现的删除器会增加std::unique_ptr类型的对象尺寸。（尽可能采用Lambda形式）
+- 默认地，资源析构采用delete运算符来实现，但可以指定自定义删除器。有状态的删除器和采用函数指针实现的删除器会增加std::unique_ptr类型的对象尺寸。（尽可能采用Lambda形式）
 - 将std::unique_ptr转换成std::shared_ptr是容易实现的
 
-## 条款19：使用std::shared_ptr管理具备共享所有权的资源
+> 1. 将一个裸指针赋给std::unique_ptr是不会通过编译的
+>
+> 2. std::unique_ptr转为std::shared_ptr的方式
+>
+>    ```cpp
+>    // 方式1
+>    unique_ptr<string> unique = make_unique<string>("test");
+>    shared_ptr<string> shared1 = move(unique);
+>    // 方式2
+>    shared_ptr<string> shared2 = make_unique<string>("test");
+>    ```
+
+## 条款19. 使用std::shared_ptr管理具备共享所有权的资源
 
 - std::shared_ptr提供方便的手段，实现了任意资源在共享所有权语义下进行生命周期管理的垃圾回收
-- 与std::unique_ptr相比，std::shared_ptr的尺寸通常是裸指针尺寸的两倍，它还会带来控制块的开销，并要求原子化的引用计数操作
+- 与std::unique_ptr相比，std::shared_ptr的尺寸通常是裸指针尺寸的两倍，它还会带来控制块的开销，并要求原子化的**引用计数**操作
 - 默认的资源析构通过delete运算符进行，但同时也支持定制删除器。删除器的类型对std::shared_ptr的类型没有影响（std::unique_ptr定制的删除器是类型相关的---`unique_ptr<类型，decltype<删除器函数>> p(nullptr, 删除器函数)`，std::shared_ptr则是类型无关的---`share_ptr<类型> p(指针，删除器函数)`）
 - 避免使用裸指针类型的变量来创建std::shared_ptr指针（容易导致创建多个控制块）
 
-## 条款20：对于类似std::shared_ptr但有可能空悬的指针使用std::weak_ptr
+> ① 引用计数的存在带来的性能影响：
+>
+> 1. std::shared_ptr的尺寸是裸指针的两倍
+> 2. 引用计数的内存必须动态分配
+> 3. 引用计数的递增和递减必须是原子操作
+>
+> ② 控制块的创建遵循下述规则：
+>
+> 1. std::make_shared总是创建一个控制块
+> 2. 从具备专属所有权的指针（即std::unique_ptr指针）出发构造一个std::shared_ptr时，会创建一个控制块
+> 3. 当std::shared_ptr构造函数使用**裸指针**作为实参来调用时，它会创建一个控制块（存在"潜在"的bug---同一个裸指针创建多个shared_ptr）--- 尽可能避免将裸指针传递给一个std::shared_ptr的构造函数；如果必须将一个裸指针传递给shared_ptr的构造函数，就直接传递new运算符的结果而非传递一个裸指针变量
+>
+> ③ 涉及this的托管：类继承自`std::enable_shared_from_this<类名>`，通常将此类的构造函数声明为private访问层级，并且只允许用户通过调用返回std::shared_ptr的工厂函数来创建对象
+
+## 条款20. 对于类似std::shared_ptr但有可能空悬的指针使用std::weak_ptr
 
 - 使用std::weak_ptr来代替可能空悬的std::shared_ptr
 - std::weak_ptr可能的用武之地包括缓存，观察者列表，以及避免std::shared_ptr指针环路
 
 
-## 条款21：优先选用std::make_unique和std::make_shared，而非直接使用new
+> ① std::weak_ptr并不是一种独立的智能指针，而是std::shared_ptr的一种扩充
+>
+> ② std::weak_ptr不影响其指涉对象的引用计数
 
-- 相比于直接使用new表达式，make系列函数消除了重复代码，改进了异常安全性，并且对于std::make_shared和std::allocate_shared而言，生成的目标代码会尺寸更小，速度更快
-- 不适于使用make系列函数的场景包括需要定制删除器，以及期望直接传递大括号初始物
+## 条款21. 优先选用std::make_unique和std::make_shared，而非直接使用new
+
+- 相比于直接使用new表达式，make系列函数消除了重复代码，改进了异常安全性，并且对于`std::make_shared`和`std::allocate_shared`而言，生成的目标代码会尺寸更小，速度更快
+- 不适合使用make系列函数的场景包括：需要定制删除器，以及期望直接传递大括号初始物（可以先创建一个`initializer_list`对象，然后将此对象传递给make系列函数）
 - 对于std::shared_ptr，不建议使用make系列函数的额外场景包括：① 自定义内存管理的类；② 内存紧张的系统，非常大的对象以及存在比指涉到相同对象的std::shared_ptr生存期更久的std::weak_ptr
 
-## 条款22：使用Pimpl习惯用法时，将特殊成员函数的定义放在实现文件中
+> ① make系列函数会把一个任意实参集合**完美转发**给动态分配内存的对象的构造函数，并返回一个指涉到该对象的智能指针
+>
+> ② 除非有充分的利用不去使用make系列函数，否则都应该使用它们
+
+## 条款22. 使用Pimpl习惯用法时，将特殊成员函数的定义放在实现文件中
+
+- Pimpl惯用法通过降低类的客户和类实现者之间的依赖性，减少了构建遍数
+- 对于采用std::unique_ptr来实现的pImpl指针，必须在类的头文件中声明特种成员函数，但在实现文件中实现它们。即使默认函数实现有着正确的行为，也必须这么做
+- 上述建议仅适用于std::unique_ptr，但并不适用std::shared_ptr
+
 
 > ① Pimpl：pointer to implementation
 >
-> ② 特殊成员函数指的的：构造函数，析构函数，复制，移动（放到此类的实现文件：xxx.cpp文件中---否则可能会出现错误）
-
-- Pimpl惯用法通过降低类的客户和类实现者之间的依赖性，减少了构建遍数
-- 对于采用std::unique_ptr来实现的pImpl指针，必须在类的头文件中声明特种成员函数，但在实现文件中实现它们。即使默认函数实现默认有着正确的行为，也必须这么做
-- 上述建议仅适用于std::unique_ptr，但并不适用std::shared_ptr
-
+> ② C++98中Pimpl可以用一个指涉到已声明但未定义的结构的裸指针来替换Widget的数据成员（其定义位于实现文件中）
+>
+> ③ 特殊成员函数指的的：构造函数，析构函数，复制，移动（放到此类的实现文件：xxx.cpp文件中---否则可能会出现错误）
+>
+> ④ std::unique_ptr和std::shared_ptr这两种智能指针在实现pImpl指针行为时的不同，源自它们对于自定义析构器的支持的不同

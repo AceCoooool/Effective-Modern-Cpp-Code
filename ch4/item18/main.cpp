@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <vector>
 #include <boost/type_index.hpp>
-#include <bits/unique_ptr.h>
+#include <memory>
 
 using namespace std;
 using boost::typeindex::type_id_with_cvr;
@@ -60,8 +60,7 @@ void demo1() {
     pInv3->Print();
 }
 
-/* -----demo1: unique_ptr with custom deleter----- */
-/* -----demo1: unique_ptr----- */
+/* -----demo2: unique_ptr with custom deleter----- */
 class Investment1 {
 public:
     Investment1(int v1, int v2) : val1(v1), val2(v2) {}
@@ -152,6 +151,20 @@ void demo3() {
     auto ptr3 = makeInvestment2(2, 10, 20);
 }
 
+/* -----demo3: unique_ptr to shared_ptr----- */
+void demo4() {
+    shared_ptr<Investment> sp = makeInvestment(0, 10, 20);
+    sp->Print();
+    cout << "convert success" << endl;
+}
+
+void demo5() {
+    unique_ptr<string> unique = make_unique<string>("test");
+    shared_ptr<string> shared1 = move(unique);
+    shared_ptr<string> shared2 = make_unique<string>("test");
+    cout << "convert success" << endl;
+}
+
 int main() {
 /* -----demo1: unique_ptr----- */
     cout << "--------demo1--------" << endl;
@@ -161,4 +174,9 @@ int main() {
     demo2();
     cout << "--------demo3--------" << endl;
     demo3();
+/* -----demo3: unique_ptr to shared_ptr----- */
+    cout << "--------demo4--------" << endl;
+    demo4();
+    cout << "--------demo5--------" << endl;
+    demo5();
 }

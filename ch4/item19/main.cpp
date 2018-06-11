@@ -44,12 +44,11 @@ class Widget1;
 
 vector<shared_ptr<Widget1>> processedWidgets;
 
-// TODO: there is a bug
 class Widget1 : public enable_shared_from_this<Widget1> {
 public:
     template<typename ... Ts>
     static shared_ptr<Widget1> create(Ts &&... params) {
-        cout << " create" << endl;
+        cout << "create " << endl;
         shared_ptr<Widget1> p(new Widget1);
         return p;
     }
