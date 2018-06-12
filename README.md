@@ -28,3 +28,15 @@
 
 - [x] item23~item30
 - [x] summary
+
+### ch6：lambda表达式
+
+- [x] item31~item34
+- [x] summary
+
+### ch7：并发API
+
+这部分不太清楚，暂时先略
+
+### ch8：微调
+
