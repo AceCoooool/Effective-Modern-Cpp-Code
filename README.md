@@ -40,3 +40,5 @@
 
 ### ch8：微调
 
+- [x] item41~item42
+- [x] summary
