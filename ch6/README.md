@@ -7,24 +7,33 @@ lambda式涉及的术语：
 - 闭包类就是实例化闭包的类。每个lambda式都会触发编译器生成一个独一无二的闭包类。而闭包中的语句会变成它的闭包类成员函数的可执行指令
 
 > lambda式和闭包类存在于**编译期**，闭包存在于**运行期**
+>
+> lambda表达式的语法形式（params--参数表，opt--函数选项，ret--返回值类型，body--函数体）：
+>
+> ```cpp
+> [capture](params) opt->ret{body};
+> // 可以缩写为
+> [capture](params){body}
+> ```
 
 ## 条款31：避免默认捕获模式
 
 - 按引用的默认捕获会导致空悬指针的问题
 
   > 按引用捕获会导致闭包包含指涉到局部变量的引用，或者指涉到定义lambda式的作用域内的形参的引用。一旦由lambda式所创建的闭包越过了该局部变量或形参的声明期，那么闭包内的引用就会空悬
+
 - 按值的默认捕获极易受空悬指针影响（尤其是this），并会误导地表面lambda是独立的
 
   > 按值捕获一个指针后，在lambda式创建的闭包中持有的是这个指针的副本，但你并无办法阻止lambda式之外的代码去对该指针实施delete操作所导致的指针副本空悬
 
 > ① 捕获的[]里参数的含义
 >
-> - [] Capture nothing (or, a scorched earth strategy?) --- 不捕获任何变量
-> - [&] Capture any referenced variable by reference --- 引用捕获
-> - [=] Capture any referenced variable by making a copy --- 按值捕获
-> - [=, &foo] Capture any referenced variable by making a copy, but capture variable foo by reference --- 拷贝与引用混合
-> - [bar] Capture bar by making a copy; don’t copy anything else --- 指定引用或拷贝
-> - [this] Capture the this pointer of the enclosing class --- 捕获this指针
+> - [] 不捕获任何变量
+> - [&] 捕获外部作用域中所有变量，并作为引用在函数体中使用 --- 按引用捕获
+> - [=] 捕获外部作用域中所有变量，并作为副本在函数体中使用 --- 按值捕获
+> - [=, &foo] 按值捕获外部作用域中所有变量，并按引用捕获foo变量 --- 拷贝与引用混合
+> - [bar] 按值捕获bar变量，同时不捕获其他变量 --- 指定引用或拷贝
+> - [this] 捕获当前类中的this指针，让lambda表达式拥有和当前类成员函数同样的访问权限。如果已经使用了&或者=，就默认添加此选项。捕获this的目的是可以在lambda中使用当前类的成员函数和成员变量 --- 捕获this指针
 >
 > ② 显式地列出lambda式所依赖的局部变量或形参是更好的软件工程实践
 >
@@ -38,7 +47,6 @@ lambda式涉及的术语：
 
 - 使用C++14的**初始化捕获**将对象移入闭包
 - 在C++11中，经由手工实现的类或std::bind去模拟初始化捕获
-
 
 > ① 使用初始化捕获，你可以指定：
 >
